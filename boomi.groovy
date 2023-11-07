@@ -60,6 +60,9 @@ class ScriptRunner {
         Boolean suppressData = options.xd
         Boolean suppressProps = options.xp
         String ddpPreplacePattern = options.rp ? options.rp : null
+        String os = System.getProperty("os.name")
+        String pathDelimiter = os.contains("Windows")? "\\\\" : "/"
+
 
         // SCRIPT
         String script = new FileInputStream(scriptName).text -~ /import com[.]boomi[.]execution[.]ExecutionUtil;?/
@@ -89,7 +92,7 @@ class ScriptRunner {
             def referencedFilePath = (value =~ /(?i)^@file\(["'](.*?)["']\)/)
             if (referencedFilePath.size() > 0) {
                 // assume the base path of the referenced file is the path of the .properties file
-                ArrayList propertiessFileNameArr = propertiesFileName.split("/")
+                ArrayList propertiessFileNameArr = propertiesFileName.split(pathDelimiter)
                 def propertiesFilePath = propertiessFileNameArr[0..-2].join("/")
 
                 // get content of referenced file
@@ -128,10 +131,10 @@ class ScriptRunner {
         if (outToFile) {
 
             // separate script name into parts
-            ArrayList scriptNameArr = scriptName.split("/")
+            ArrayList scriptNameArr = scriptName.split(pathDelimiter)
             def scriptPath = scriptNameArr[0..-2].join("/")
-            def scriptNameHead = scriptNameArr[-1] -~ /\.b\.groovy$/ -~ /\.groovy$/
-            // println "scriptNameHead: " + scriptNameHead
+            def scriptNameHead = scriptNameArr[-1].replaceFirst("\\.\\\\","") -~ /\.b\.groovy$/ -~ /\.groovy$/
+            println "scriptNameHead: " + scriptNameHead
 
             // path of dir to write files
             def execFilesPath = scriptPath + "/_exec/"
