@@ -160,7 +160,7 @@ class ScriptRunner {
 
         if (!suppressProps) {
             if (properties.propertyNames().hasMoreElements()) {
-                output += "\nDynamic Document Props\n----------------------\n"
+                output += "\n\nDynamic Document Props\n----------------------\n"
                 output += dynamicDocumentPropsString
                     .replaceAll("document.dynamic.userdefined.","")
                     .replaceAll(/($ddpPreplacePattern?)=.*\n/,"\$1=...\n")
