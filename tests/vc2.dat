@@ -1,0 +1,30 @@
+{
+  "Records": [
+    {
+      "TableInstanceId": 193,
+      "TableDefinitionId": 73,
+      "ReportContentItem_DynamicTableId": 128,
+      "UserInputValues": [
+        {
+          "UserInputId": 141,
+          "UserInputValue": "17-001163, 15-001718, 16-004757"
+        }
+      ],
+      "TableInstanceSequenceNum": 1,
+      "UserInputsIdentifier": "17-001163, 15-001718, 16-004757"
+    },
+    {
+      "TableInstanceId": 194,
+      "TableDefinitionId": 73,
+      "ReportContentItem_DynamicTableId": 128,
+      "UserInputValues": [
+        {
+          "UserInputId": 141,
+          "UserInputValue": "18-000391"
+        }
+      ],
+      "TableInstanceSequenceNum": 2,
+      "UserInputsIdentifier": "18-000391"
+    }
+  ]
+}
