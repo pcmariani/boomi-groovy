@@ -5,7 +5,7 @@ workingDir="$(pwd)"
 # echo "shell BOOMI_SCRIPT_TESTER_DIRECTORY: $BOOMI_SCRIPT_TESTER_DIRECTORY"
 
 pushd $BOOMI_SCRIPT_TESTER_DIRECTORY > /dev/null
-# groovy "$BOOMI_SCRIPT_TESTER_DIRECTORY"/BoomiTestBed.groovy $@ -w "$workingDir"
+
 groovy "$BOOMI_SCRIPT_TESTER_DIRECTORY"/"$BOOMI_SCRIPT_TESTER_FILENAME" $@ -w "$workingDir"
 exitCode="$?"
 
