@@ -43,8 +43,9 @@ class BoomiTestBed {
             println new ScriptRunner().run(scriptName, dataDocumentName, propertiesFileName, options)
         }
         catch(Exception e) {
-            println("!!! EXCEPTION !!!")
+            println("-----------------\n!!! EXCEPTION !!!\n-----------------")
             org.codehaus.groovy.runtime.StackTraceUtils.sanitize(e).printStackTrace()
+            // println("-----------------")
             System.exit(1)
         }
 
@@ -134,7 +135,7 @@ class ScriptRunner {
             ArrayList scriptNameArr = scriptName.split(pathDelimiter)
             def scriptPath = scriptNameArr[0..-2].join("/")
             def scriptNameHead = scriptNameArr[-1].replaceFirst("\\.\\\\","") -~ /\.b\.groovy$/ -~ /\.groovy$/
-            println "scriptNameHead: " + scriptNameHead
+            // println "scriptNameHead: " + scriptNameHead
 
             // path of dir to write files
             def execFilesPath = scriptPath + "/_exec/"
