@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 
+nameOfBoomiGroovyScript="boomi.groovy"
+
 workingDir="$(pwd)"
-# echo "shell workdingDir: $workingDir"
-# echo "shell BOOMI_SCRIPT_TESTER_DIRECTORY: $BOOMI_SCRIPT_TESTER_DIRECTORY"
+# echo "workdingDir: $workingDir"
+# echo "BOOMI_GROOVY_HOME: $BOOMI_GROOVY_HOME"
 
-pushd $BOOMI_SCRIPT_TESTER_DIRECTORY > /dev/null
+pushd $BOOMI_GROOVY_HOME > /dev/null
 
-groovy "$BOOMI_SCRIPT_TESTER_DIRECTORY"/"$BOOMI_SCRIPT_TESTER_FILENAME" $@ -w "$workingDir"
+groovy "$BOOMI_GROOVY_HOME"/"$nameOfBoomiGroovyScript" $@ -w "$workingDir"
 exitCode="$?"
 
 popd > /dev/null
