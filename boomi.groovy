@@ -1,8 +1,8 @@
 import java.util.logging.Logger;
 
-class BoomiTestBed {
+class BoomiGroovy {
     static void main(String[] args) throws Exception {
-        def cli = new CliBuilder(usage: 'BoomiTestBed.groovy [-h][-on][-of][-od][-f][-xd][-xp] -s script [-d document] [-p properties] [-e extension] [-w working-dir] [-rp pattern]')
+        def cli = new CliBuilder(usage: 'boomi-groovy.groovy [-h][-o][-xd][-xp] -s script [-d document] [-p properties] [-e extension] [-w working-dir] [-rp pattern]')
 
         cli.with {
             h  longOpt: 'help', 'Show usage'
@@ -24,60 +24,63 @@ class BoomiTestBed {
         }
 
         String workingDir = options.w ? options.w : System.getProperty("user.dir")
-        String scriptName = options.s ? workingDir + "/" + options.s : null
-        String dataDocumentName = options.d ? workingDir + "/" + options.d : null
-        String propertiesFileName = options.p ? workingDir + "/" + options.p : null
+        String scriptFileFullPath = options.s ? workingDir + "/" + options.s : null
+        String dataFileFullPath = options.d ? workingDir + "/" + options.d : null
+        String propsFileFullPath = options.p ? workingDir + "/" + options.p : null
         // println "PWD: " + System.getProperty("user.dir")
         // println "options.w: " + options.w
         // println "workingDir: " + workingDir
-        // println "scriptName: " + scriptName
-        // println "dataDocumentName: " + dataDocumentName
-        // println "propertiesFileName: " + propertiesFileName
+        // println "scriptFileFullPath: " + scriptFileFullPath
+        // println "dataFileFullPath: " + dataFileFullPath
+        // println "propsFileFullPath: " + propsFileFullPath
 
-        if (scriptName == null) {
+        String os = System.getProperty("os.name")
+
+        if (scriptFileFullPath == null) {
             cli.usage()
             return
         }
 
         try {
-            println new ScriptRunner().run(scriptName, dataDocumentName, propertiesFileName, options)
+            println new ScriptRunner().run(os, scriptFileFullPath, dataFileFullPath, propsFileFullPath, options)
         }
         catch(Exception e) {
-            println("-----------------\n!!! EXCEPTION !!!\n-----------------")
-            org.codehaus.groovy.runtime.StackTraceUtils.sanitize(e).printStackTrace()
-            // println("-----------------")
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            org.codehaus.groovy.runtime.StackTraceUtils.sanitize(e).printStackTrace(pw)
+            def padChar = "**  "
+            println padChar + sw.toString().replaceAll(/\n/, "\n$padChar ").replaceAll(/\n.*?\(Unknown Source\)\n/, "\n").replaceFirst(/\$padChar\s*$/,"")
             System.exit(1)
         }
-
     }
 }
 
 class ScriptRunner {
 
-    String run(String scriptName, String dataDocumentName, String propertiesFileName, def options) {
+    String run(String os, String scriptFileFullPath, String dataFileFullPath, String propsFileFullPath, def options) {
 
         // OPTIONS
         Boolean outToFile = options.o
         Boolean suppressData = options.xd
         Boolean suppressProps = options.xp
+        String workingPath = options.w
         String ddpPreplacePattern = options.rp ? options.rp : null
-        String os = System.getProperty("os.name")
         String pathDelimiter = os.contains("Windows")? "\\\\" : "/"
 
 
         // SCRIPT
-        String script = new FileInputStream(scriptName).text -~ /import com[.]boomi[.]execution[.]ExecutionUtil;?/
+        String script = new FileInputStream(scriptFileFullPath).text -~ /import com[.]boomi[.]execution[.]ExecutionUtil;?/
 
         // DOCUMENT
         InputStream documentContents = new ByteArrayInputStream("".getBytes("UTF-8"))
-        if (dataDocumentName != null) {
-            documentContents = new FileInputStream(dataDocumentName)
+        if (dataFileFullPath != null) {
+            documentContents = new FileInputStream(dataFileFullPath)
         }
 
         // PROPS
         Properties properties = new Properties()
-        if (propertiesFileName != null) {
-            properties.load(new FileInputStream(propertiesFileName) as InputStream)
+        if (propsFileFullPath != null) {
+            properties.load(new FileInputStream(propsFileFullPath) as InputStream)
         }
 
         Properties dynamicProcessProperties = new Properties()
@@ -93,7 +96,7 @@ class ScriptRunner {
             def referencedFilePath = (value =~ /(?i)^@file\(["'](.*?)["']\)/)
             if (referencedFilePath.size() > 0) {
                 // assume the base path of the referenced file is the path of the .properties file
-                ArrayList propertiessFileNameArr = propertiesFileName.split(pathDelimiter)
+                ArrayList propertiessFileNameArr = propsFileFullPath.split(pathDelimiter)
                 def propertiesFilePath = propertiessFileNameArr[0..-2].join("/")
 
                 // get content of referenced file
@@ -131,27 +134,24 @@ class ScriptRunner {
         // WRITE FILES
         if (outToFile) {
 
-            // separate script name into parts
-            ArrayList scriptNameArr = scriptName.split(pathDelimiter)
-            def scriptPath = scriptNameArr[0..-2].join("/")
-            def scriptNameHead = scriptNameArr[-1].replaceFirst("\\.\\\\","") -~ /\.b\.groovy$/ -~ /\.groovy$/
-            // println "scriptNameHead: " + scriptNameHead
+            def scriptFileNameHead = scriptFileFullPath -~ /\.b\.groovy$/ -~ /\.groovy$/ -~ /^.*$pathDelimiter/
+            // println "scriptFileNameHead: " + scriptFileNameHead
 
-            // path of dir to write files
-            def execFilesPath = scriptPath + "/_exec/"
+            def execFolderPath = workingPath.replaceFirst("\\.\\\\","") + "/" + "_exec"
+            // println "execFolderPath: " + execFolderPath
 
-            // create dir if doesn't exist
-            File execFilesDir = new File(execFilesPath);
-            if (execFilesDir.exists()) execFilesDir.deleteDir()
+            File execFilesDir = new File(execFolderPath);
+            execFilesDir.deleteDir()
             execFilesDir.mkdir()
 
             // write data file
-            File outDataFile = new File(execFilesPath + scriptNameHead + "_out.dat")
-            outDataFile.write resultString
+            File execDataFile = new File(execFolderPath + "/" + scriptFileNameHead + "_out.dat")
+            execDataFile.write resultString
 
             // write props file
-            File outPropsFile = new File(execFilesPath + scriptNameHead + "_out.properties")
-            outPropsFile.write dynamicProcessPropsString + "\n" + dynamicDocumentPropsString
+            File execPropsFile = new File(execFolderPath + "/" + scriptFileNameHead + "_out.properties")
+            execPropsFile.write dynamicProcessPropsString + "\n" + dynamicDocumentPropsString
+
         }
 
 
@@ -166,8 +166,8 @@ class ScriptRunner {
             if (properties.propertyNames().hasMoreElements()) {
                 output += "\n\nDynamic Document Props\n----------------------\n"
                 output += dynamicDocumentPropsString
-                    .replaceAll("document.dynamic.userdefined.","")
-                    .replaceAll(/($ddpPreplacePattern?)=.*\n/,"\$1=...\n")
+                .replaceAll("document.dynamic.userdefined.","")
+                .replaceAll(/($ddpPreplacePattern?)=.*\n/,"\$1=...\n")
             }
             if (dynamicProcessProperties.propertyNames().hasMoreElements()) {
                 output += "\n\nDYNAMIC PROCESS PROPS\n---------------------\n"
@@ -184,8 +184,8 @@ class ScriptRunner {
         while (e.hasMoreElements()) {
             String key = (String) e.nextElement()
             String value = properties.getProperty(key)
-                                .replaceAll("\r?\n","")
-                                .replaceAll("\\\\","\\\\\\\\")
+            .replaceAll("\r?\n","")
+            .replaceAll("\\\\","\\\\\\\\")
             propsString += "${key}=${value}\n"
         }
         return propsString
@@ -240,6 +240,6 @@ class DataContext {
     }
 
     String print() {
-      this.is.text
+        this.is.text
     }
 }
