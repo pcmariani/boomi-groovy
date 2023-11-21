@@ -63,6 +63,8 @@ elif [[ $color -eq 1 || $align -eq 1 ]]; then
 				elif echo "$firstLine" | grep -q '|\^|'; then
 					# echo "|^| delimted"
 					echo "$output" | sed 's/|\^|/\t/g' | bat -pp -l 'Comma Separated Values'
+				elif echo "$output" | grep -q '.*SELECT.*FROM.*'; then
+					echo "$output" | bat -pp -l 'SQL'
 				fi
 			elif [[ $align -eq 1 ]]; then
 				# echo "align"
