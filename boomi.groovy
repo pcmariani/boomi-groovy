@@ -1,3 +1,6 @@
+// import groovy.transform.SourceURI
+// import java.nio.file.Path
+// import java.nio.file.Paths
 import java.util.logging.Logger;
 
 class BoomiGroovy {
@@ -27,8 +30,15 @@ class BoomiGroovy {
         String scriptFileFullPath = options.s ? workingDir + "/" + options.s : null
         String dataFileFullPath = options.d ? workingDir + "/" + options.d : null
         String propsFileFullPath = options.p ? workingDir + "/" + options.p : null
-        // println "PWD: " + System.getProperty("user.dir")
+        // println "System.getProperty('user.dir'): " + System.getProperty('user.dir')
         // println "options.w: " + options.w
+        // println "System.getProperty('dirAncestor'): " + System.getProperty('dirAncestor')
+        // println "getAbsolutePath: " + new File(".").getAbsolutePath().toString()
+        // @SourceURI
+        // URI sourceUri
+        // Path scriptLocation = Paths.get(sourceUri)
+        // println "Paths.get sourceUri: " + scriptLocation
+        //
         // println "workingDir: " + workingDir
         // println "scriptFileFullPath: " + scriptFileFullPath
         // println "dataFileFullPath: " + dataFileFullPath
