@@ -58,7 +58,7 @@ class BoomiGroovy {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             org.codehaus.groovy.runtime.StackTraceUtils.sanitize(e).printStackTrace(pw)
-            def padChar = "**  "
+            def padChar = "| "
             println padChar + sw.toString().replaceAll(/\n/, "\n$padChar ").replaceAll(/\n.*?\(Unknown Source\)\n/, "\n").replaceFirst(/\$padChar\s*$/,"")
             System.exit(1)
         }
