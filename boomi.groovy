@@ -26,10 +26,13 @@ class BoomiGroovy {
             return
         }
 
+        String os = System.getProperty("os.name")
+        String pathDelimiter = os.contains("Windows")? "\\\\" : "/"
+
         String workingDir = options.w ? options.w : System.getProperty("user.dir")
-        String scriptFileFullPath = options.s ? workingDir + "/" + options.s : null
-        String dataFileFullPath = options.d ? workingDir + "/" + options.d : null
-        String propsFileFullPath = options.p ? workingDir + "/" + options.p : null
+        String scriptFileFullPath = options.s ? workingDir + pathDelimiter + options.s : null
+        String dataFileFullPath = options.d ? workingDir + pathDelimiter + options.d : null
+        String propsFileFullPath = options.p ? workingDir + pathDelimiter + options.p : null
         // println "System.getProperty('user.dir'): " + System.getProperty('user.dir')
         // println "options.w: " + options.w
         // println "System.getProperty('dirAncestor'): " + System.getProperty('dirAncestor')
@@ -43,8 +46,6 @@ class BoomiGroovy {
         // println "scriptFileFullPath: " + scriptFileFullPath
         // println "dataFileFullPath: " + dataFileFullPath
         // println "propsFileFullPath: " + propsFileFullPath
-
-        String os = System.getProperty("os.name")
 
         if (scriptFileFullPath == null) {
             cli.usage()
@@ -108,9 +109,9 @@ class ScriptRunner {
                 // assume the base path of the referenced file is the path of the .properties file
                 ArrayList propertiessFileNameArr = propsFileFullPath.split(pathDelimiter)
                 def propertiesFilePath = propertiessFileNameArr[0..-2].join("/")
-
                 // get content of referenced file
                 String referencedFileFullPath = "${propertiesFilePath}/${referencedFilePath[0][1]}"
+                // println referencedFileFullPath
                 value = new FileInputStream(referencedFileFullPath).text.replaceAll("\r?\n","")
                 properties.setProperty(key,value)
                 // println value
