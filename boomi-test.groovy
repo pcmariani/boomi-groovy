@@ -40,9 +40,9 @@ class BoomiGroovyTest {
 
                 executeCommand([
                     "groovy boomi.groovy",
-                    "-s" + script.name + ".groovy",
-                    "-d" + testName + ".dat",
-                    "-p" + testName + ".properties",
+                    "-s " + script.name + ".groovy",
+                    "-d " + testName + ".dat",
+                    "-p " + testName + ".properties",
                     script.args,
                     opt_xd,
                     opt_xp,
@@ -59,21 +59,31 @@ class BoomiGroovyTest {
     }
 
     private static void executeCommand(String command) {
+        def os = System.getProperty("os.name")
+        if (os.contains("Windows")) {
+            command = 'powershell -ExecutionPolicy Bypass -NoLogo -NonInteractive -NoProfile -Command ' + command
+            // println command
+            def exec = command.execute()
+            exec.waitFor()
+            println exec.getText()
+        }
+        else {
+            // println command
+            def result = new StringBuilder()
+            def error = new StringBuilder()
+            def exec = command.execute()
 
-        // println command
-        def result = new StringBuilder()
-        def error = new StringBuilder()
-        def exec = command.execute()
+            exec.consumeProcessOutput(result, error)
+            exec.waitForOrKill(1000)
 
-        exec.consumeProcessOutput(result, error)
-        exec.waitForOrKill(1000)
-
-        if (!error.toString().equals("")) {
-          println "ERROR"
-          println error
-          println result
-        } else {
-            println result
+            if (!error.toString().equals("")) {
+                println "ERROR"
+                println error
+                println result
+            } else {
+                println "HELLO"
+                println result.toString()
+            }
         }
     }
 
